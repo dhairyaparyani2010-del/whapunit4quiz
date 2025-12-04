@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WHAP Unit 4 Ultimate Review</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+/* Custom Styles for Aesthetics and Responsiveness */
+body{font-family:'Inter',sans-serif;background:linear-gradient(to bottom,#fef3c7,#fde68a);}
+header h1{
+    background:linear-gradient(90deg,#7c3aed,#4338ca,#2563eb);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+.option-button{
+    transition:all 0.3s;
+    cursor:pointer;
+    border-radius:1rem;
+    padding:1rem 1.5rem;
+    font-weight:600;
+    text-align:left;
+    background:linear-gradient(135deg,#8b5cf61a,#4f46e51a);
+    color:#374151; /* Dark Gray Text */
+    border:2px solid #a78bfa;
+    box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+.option-button:hover{
+    transform:translateY(-2px) scale(1.01);
+    background:linear-gradient(135deg,#8b5cf640,#4f46e540);
+}
+.selected-option{
+    border:3px solid #10b981;
+    background:linear-gradient(135deg,#34d399,#10b981);
+    color:white;
+    box-shadow:0 6px 15px rgba(16, 185, 129, 0.4);
+}
+.correct-answer{
+    background:linear-gradient(135deg,#6ee7b7,#10b981,#059669);
+    border:3px solid #059669;
+    color:white;
+    font-weight:700;
+}
+.incorrect-answer{
+    background:linear-gradient(135deg,#fca5a5,#ef4444,#b91c1c);
+    border:3px solid #b91c1c;
+    color:white;
+    text-decoration:line-through;
+}
+.flashcard{
+    border-radius:1rem;
+    padding:1rem 1.5rem;
+    transition:all 0.4s ease-in-out;
+    background:linear-gradient(135deg,#fef9c3,#fcd34d);
+    border:2px solid #fbbf24;
+    cursor:pointer;
+    font-weight:600;
+    min-height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align:center;
+    box-shadow:0 4px 6px rgba(0,0,0,0.05);
+}
+.flashcard:hover{transform:scale(1.03);box-shadow:0 8px 15px rgba(0,0,0,0.2);}
+.flashcard.flipped{background:linear-gradient(135deg,#fde68a,#f59e0b);color:black;font-weight:500;font-size:0.9rem;}
+textarea{border:2px solid #4f46e5;border-radius:0.75rem;padding:0.75rem;width:100%;resize:vertical;min-height: 150px;}
+#feedback-area{padding:1.5rem;border-radius:1.5rem;margin-top:1rem;display:none; transition: all 0.5s;}
+#feedback-area.correct{background:linear-gradient(135deg,#d1fae5,#6ee7b7);border:1px solid #10b981;}
+#feedback-area.saq-model{background:linear-gradient(135deg,#e0f2fe,#93c5fd);border:1px solid #3b82f6;}
+</style>
+</head>
+<body class="p-4 md:p-8">
+
+<!-- App Container -->
+<div id="app" class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10 border border-gray-100">
+<header class="mb-8 pb-4 border-b border-gray-200">
+<h1 class="text-5xl font-extrabold text-center">WHAP Unit 4 Ultimate Review</h1>
+<p class="text-gray-600 mt-2 text-center text-lg">Transoceanic Interconnections (c. 1450 - c. 1750)</p>
+</header>
+
+<div class="mb-8 p-4 bg-blue-50 rounded-2xl shadow-md border border-blue-200 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+    <div class="flex items-center space-x-4">
+        <label for="mode-selector" class="block text-lg font-medium text-blue-800">Review Mode:</label>
+        <select id="mode-selector" onchange="resetApp()" class="pl-3 pr-10 py-2 text-base border-gray-300 rounded-lg shadow-inner focus:ring-blue-500 focus:border-blue-500">
+            <option value="MCQ" selected>MCQ (Multiple Choice)</option>
+            <option value="SAQ">SAQ (Short Answer Practice)</option>
+        </select>
+    </div>
+    <div class="text-center md:text-right">
+        <p class="text-xl font-semibold text-blue-800">Current Focus: <span id="active-topic-display" class="font-bold text-blue-600">Loading...</span></p>
+        <p id="mcq-score-display" class="text-3xl font-bold text-gray-700 mt-1">Score: <span id="current-score" class="text-green-600">0</span></p>
+        <button onclick="resetApp(true)" class="mt-1 text-sm text-red-500 hover:text-red-700 transition font-semibold">Reset Score & Questions</button>
+    </div>
+</div>
+
+<!-- Question Card -->
+<div class="question-card border border-gray-300 rounded-2xl p-6 mb-6 shadow-xl bg-white">
+<h2 id="question-text" class="text-xl md:text-2xl font-bold text-gray-900 mb-6 min-h-20"></h2>
+<div id="dynamic-content-area" class="flex flex-col gap-4">
+    <!-- Options or Textarea loads here -->
+</div>
+<div class="flex justify-start space-x-4 mt-6">
+    <button id="submit-button" onclick="submitAnswer()" class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-2xl shadow-lg transition duration-200 hidden">Submit Answer</button>
+    <button id="next-button" onclick="loadNewQuestion()" class="px-8 py-3 bg-gradient-to-r from-green-500 to-teal-500 hover:from-green-600 hover:to-teal-600 text-white font-bold rounded-2xl shadow-lg transition duration-200 hidden">Next Question</button>
+</div>
+<div id="feedback-area"></div>
+</div>
+
+<!-- Flashcards -->
+<div class="mt-8 p-6 bg-yellow-50 rounded-2xl shadow-inner border border-yellow-300">
+<h3 class="text-3xl font-bold text-yellow-800 mb-5">Key Vocabulary Flashcards (1450–1750)</h3>
+<div id="flashcards-container" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+</div>
+
+<div class="mt-8 text-center text-gray-500 font-semibold border-t pt-4">© 2025 WHAP Review Tool | Designed by Dhairya</div>
+
+<script>
+// --- DATA DEFINITION ---
+
+const vocabData = {
+    "Caravel": "A small, highly maneuverable sailing ship developed by the Portuguese, ideal for ocean exploration due to its lateen (triangular) sails.",
+    "Astrolabe": "An instrument used by navigators to determine latitude by measuring the altitude of celestial bodies, aiding in ocean navigation.",
+    "Joint-stock Company": "A business entity where different stocks can be bought and owned by shareholders, minimizing risk for individual investors (e.g., British/Dutch East India Companies).",
+    "Mercantilism": "An economic theory that trade generates wealth and is stimulated by the accumulation of profitable balances, which a government should encourage by obtaining colonies and ensuring exports exceed imports.",
+    "Columbian Exchange": "The widespread transfer of plants, animals, culture, human populations, technology, diseases, and ideas between the Americas, West Africa, and the Old World in the 15th and 16th centuries.",
+    "Chattel Slavery": "A system where enslaved people are treated as personal property of the owner and can be bought and sold, largely replacing indentured servitude and indigenous labor in plantation agriculture.",
+    "Mit'a System (adapted)": "The mandatory public service labor system originally used by the Inca, adapted by the Spanish for mining silver, notably in Potosí.",
+    "Vodun (Voodoo)": "A syncretic religion developed in the Caribbean (Haiti) and Lousiana, blending West African spiritual beliefs with Catholic rituals, demonstrating cultural resistance.",
+    "Encomienda System": "A Spanish colonial system where a Spanish settler was granted a specified number of native laborers in exchange for protecting them and instructing them in the Catholic faith. It was eventually replaced by the harsher *hacienda* system.",
+    "Potosí": "Location in the Andes Mountains (modern Bolivia) that became the world's most productive silver mine, fueling global trade and Spanish imperial power.",
+    "Triangular Trade": "The network of trade routes connecting Europe, Africa, and the Americas, primarily involving the exchange of manufactured goods, enslaved Africans, and raw materials/cash crops.",
+    "Devshirme": "A system utilized by the Ottoman sultans to take Christian boys from the Balkans, convert them to Islam, and train them for elite military service (Janissaries) or administrative positions."
+};
+
+const quizData = {
+    "4.1: Tech & Exploration": [
+        {
+            question: "[4.1] Which technological innovation most directly facilitated the transoceanic voyages of the late 15th century by allowing ships to sail against the wind?",
+            options: ["The magnetic compass", "The lateen sail and caravel design", "The sextant", "The mercury thermometer"],
+            correct: 1,
+            explanation: "The lateen (triangular) sail, adopted from Arab merchants, allowed ships like the Portuguese caravel to maneuver effectively in diverse wind conditions, making long-distance oceanic travel feasible."
+        },
+        {
+            question: "[4.1] A primary motivation for European maritime exploration in the 15th and 16th centuries was to:",
+            options: ["Secure control over the trans-Saharan gold-salt trade routes.", "Bypass the Ottoman and Venetian control of the overland spice trade.", "Establish permanent settlements in Sub-Saharan Africa.", "Find new trade partners for coal and iron ore."],
+            correct: 1,
+            explanation: "European powers sought direct sea routes to Asia to eliminate the costly intermediaries (Venetians and Ottomans) who controlled the flow of highly-demanded luxury goods like spices and silk."
+        }
+    ],
+    "4.3/4.4: Global Trade & Empires": [
+        {
+            question: "[4.3] The massive inflow of silver from the Americas (e.g., Potosí) ultimately had which of the following significant global economic effects?",
+            options: ["It caused immediate deflation across all of Eurasia due to oversupply.", "It funded Spanish military expansion in Europe and stimulated the monetization of the Chinese economy.", "It led to the collapse of the Mughal Empire due to a lack of bullion.", "It resulted in a shift of global manufacturing dominance from China to Spain."],
+            correct: 1,
+            explanation: "Spanish silver (the pieces of eight) flowed primarily to China, which had a high demand for silver to pay taxes. This influx stimulated Chinese markets and financed Spain's imperial ambitions, while also causing inflation globally."
+        },
+        {
+            question: "[4.4] The establishment of joint-stock companies, such as the British and Dutch East India Companies, was an innovation primarily designed to:",
+            options: ["Guarantee a monopoly for the monarch over colonial trade.", "Mitigate the financial risk associated with long-distance trade and colonization.", "Introduce democratic voting rights for colonial citizens.", "Promote free-market capitalism without government intervention."],
+            correct: 1,
+            explanation: "By selling shares to multiple investors, the risk of loss from a single ship or venture was spread out, encouraging greater investment in expensive, high-risk, high-reward ventures."
+        },
+        {
+            question: "[4.4] The Portuguese Empire's primary strategy in the Indian Ocean during the 16th century relied upon:",
+            options: ["The conquest and annexation of large interior territories like India and Persia.", "Establishing a monopoly on the spice trade by seizing control of key choke points and creating fortified trading posts.", "Forming a political alliance with the Ottoman Empire to stabilize trade.", "Focusing exclusively on the exchange of enslaved labor for manufactured goods."],
+            correct: 1,
+            explanation: "Portugal employed a 'trading post empire' strategy, seizing strategic coastal locations like Goa and Malacca and enforcing a 'trade-pass' system (*cartaz*) to control and tax maritime trade."
+        }
+    ],
+    "4.5/4.7: Exchange, Labor & Resistance": [
+        {
+            question: "[4.5] Which of the following was the most significant immediate effect of the Columbian Exchange on the populations of the Americas?",
+            options: ["Increased nutritional variety leading to a population boom.", "The introduction of the horse, which facilitated hunting and transportation.", "A catastrophic decline in population due to Old World diseases like smallpox.", "The widespread adoption of Confucianism and Buddhist beliefs."],
+            correct: 2,
+            explanation: "The 'Great Dying' caused by epidemic diseases (smallpox, measles, influenza) against which indigenous populations had no immunity led to a mortality rate of up to 90% in some regions, fundamentally restructuring American societies."
+        },
+        {
+            question: "[4.7] The shift from using indigenous American labor to African chattel slavery in the Caribbean and Brazil was primarily due to:",
+            options: ["The Spanish crown's legal ban on enslaving Native Americans.", "The development of new sailing technology that made the transatlantic journey much faster.", "The devastating mortality rates of indigenous laborers from disease and brutal working conditions.", "The discovery of new gold mines in West Africa."],
+            correct: 2,
+            explanation: "The demographic collapse of indigenous populations made it impossible to staff the labor-intensive sugar plantations. Africans, forcibly brought across the Atlantic, became the primary labor source due to their resistance to some Old World diseases and the continuous supply via the Transatlantic Slave Trade."
+        },
+        {
+            question: "[4.7] The development of Vodun (Voodoo) in Haiti and Santería in Cuba best illustrates which of the following historical processes?",
+            options: ["Total assimilation into European Catholicism.", "The rejection of all foreign cultural influences.", "Syncretism between African spiritual beliefs and Christianity.", "An increase in local political autonomy."],
+            correct: 2,
+            explanation: "Syncretism is the blending of cultural or religious traditions. These practices blended West African cosmological traditions, deities, and rituals with the Catholic traditions of their enslavers as a means of cultural preservation and resistance."
+        }
+    ],
+    "4.6: State Expansion & Rivalry": [
+        {
+            question: "[4.6] The Ottoman, Safavid, and Mughal Empires are collectively known as 'Gunpowder Empires' because:",
+            options: ["They relied on massive cavalry forces supplied by the Central Asian steppe.", "They were land-based empires that successfully centralized power and expanded territory using military technology like cannons and firearms.", "They all adopted Western European political structures and law codes.", "They fought exclusively against each other for control of the supply of saltpeter."],
+            correct: 1,
+            explanation: "The strategic deployment and mastery of gunpowder weapons and artillery allowed these empires to conquer vast territories, defeat rivals, and maintain centralized authority over large, diverse populations."
+        },
+        {
+            question: "[4.6] In response to growing European maritime trade, the Ming and Qing Dynasties in China primarily adopted a policy of:",
+            options: ["Massive naval expansion to challenge European dominance in the Indian Ocean.", "Strict isolationism and restricting European access to a few designated ports, like Canton.", "A full-scale embrace of European industrial technology and banking methods.", "Conquest of new territories in Southeast Asia to secure resources."],
+            correct: 1,
+            explanation: "The Ming and Qing generally viewed European trade with suspicion, limiting access to coastal cities (the Canton System under the Qing) to control foreign influence and maintain cultural purity and stability."
+        }
+    ],
+    "SAQ": [
+        {
+            question: "Analyze the role of commodities in the development of the global economy during the period 1450–1750.\n\nSpecifically address (A) the role of silver, (B) the role of cash crops like sugar or tobacco, and (C) one specific demographic change resulting from the trade of these commodities.",
+            modelAnswer: {
+                A: "Silver, primarily mined in Spanish America (e.g., Potosí), became the world's first global currency. It flowed from the Americas to Europe, and then overwhelmingly to Asia (especially China) to purchase luxury goods. This exchange stimulated the global economy, funded European wars, and enabled China's shift to a silver-based tax system, while causing inflation in Spain.",
+                B: "Cash crops like sugar and tobacco, grown in plantation systems in the Caribbean and Brazil, led to immense profits for European colonial powers. The high demand in Europe drove the establishment of large, mono-crop agricultural operations that relied on coerced labor systems.",
+                C: "The demand for cash crops directly led to the forced migration of millions of Africans across the Atlantic, known as the Transatlantic Slave Trade (a demographic shift in West Africa and the Americas). It also caused the catastrophic decline in the indigenous population of the Americas due to Old World diseases (the Great Dying), which necessitated the importation of African labor."
+            }
+        }
+    ]
+};
+
+let currentQuestion = null;
+let currentUser = { score: 0 };
+const allMCQQuestions = Object.values(quizData).filter(key => key !== quizData.SAQ).flat();
+
+// --- FUNCTION DEFINITIONS ---
+
+function renderFlashcards(){
+    const container = document.getElementById('flashcards-container');
+    container.innerHTML = '';
+    Object.keys(vocabData).forEach(word => {
+        const definition = vocabData[word];
+        const div = document.createElement('div');
+        div.className = 'flashcard';
+        div.innerText = word;
+        let flipped = false;
+        div.onclick = () => {
+            flipped = !flipped;
+            div.innerText = flipped ? definition : word;
+            div.classList.toggle('flipped');
+        };
+        container.appendChild(div);
+    });
+}
+
+function loadNewQuestion(){
+    const mode = document.getElementById('mode-selector').value;
+    const area = document.getElementById('dynamic-content-area');
+    const feedback = document.getElementById('feedback-area');
+    
+    // Reset UI state
+    area.innerHTML = '';
+    feedback.style.display = 'none';
+    feedback.className = "";
+    document.getElementById('submit-button').style.display = 'none';
+    document.getElementById('next-button').style.display = 'none';
+
+    if (mode === "SAQ") {
+        // Load the dedicated SAQ
+        currentQuestion = quizData["SAQ"][0]; 
+        document.getElementById('question-text').innerText = currentQuestion.question;
+        document.getElementById('active-topic-display').innerText = 'SAQ Review';
+
+        // SAQ UI setup
+        area.innerHTML = '<p class="text-gray-600 italic mb-4 p-3 bg-yellow-100 rounded-lg border border-yellow-200">Type your answer in the box below, focusing on the three required parts (A, B, C). Then, reveal the model answer to self-grade your response.</p>';
+        
+        const userTextArea = document.createElement('textarea');
+        userTextArea.rows = 8;
+        userTextArea.id = 'saq-user-response';
+        userTextArea.placeholder = "Type your SAQ response here (e.g., A. Silver...).";
+        area.appendChild(userTextArea);
+        
+        const showBtn = document.createElement('button');
+        showBtn.className = 'px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold rounded-2xl shadow-lg mt-4 transition duration-200';
+        showBtn.innerText = "Reveal Model Answer & Grade";
+        showBtn.onclick = showModelAnswer;
+        area.appendChild(showBtn);
+
+    } else { // MCQ Mode
+        // Load a random MCQ from the entire pool
+        const questionList = allMCQQuestions;
+        if (questionList.length === 0) {
+            document.getElementById('question-text').innerText = "No questions loaded.";
+            return;
+        }
+        const qIndex = Math.floor(Math.random() * questionList.length);
+        currentQuestion = questionList[qIndex];
+        
+        // Extract topic for display
+        const topicMatch = currentQuestion.question.match(/^\[(.*?)\]/);
+        const displayTopic = topicMatch ? topicMatch[1] : 'Mixed MCQ';
+
+        document.getElementById('question-text').innerText = currentQuestion.question;
+        document.getElementById('active-topic-display').innerText = displayTopic;
+
+        // MCQ UI setup
+        currentQuestion.options.forEach((opt, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-button';
+            btn.innerText = opt;
+            btn.setAttribute('data-index', index);
+            btn.onclick = () => {
+                document.querySelectorAll('.option-button').forEach(b => b.classList.remove('selected-option'));
+                btn.classList.add('selected-option');
+                document.getElementById('submit-button').style.display = 'inline-block';
+            };
+            area.appendChild(btn);
+        });
+    }
+}
+
+function submitAnswer(){
+    const selected = document.querySelector('.option-button.selected-option');
+    if(!selected){
+        const userMessage = document.createElement('div');
+        userMessage.className = "p-3 bg-red-100 text-red-700 rounded-lg mt-2";
+        userMessage.innerText = "Please select an option before submitting.";
+        document.getElementById('feedback-area').replaceWith(userMessage);
+        return;
+    }
+    
+    // Disable all options
+    document.querySelectorAll('.option-button').forEach(b => b.onclick = null);
+
+    const index = parseInt(selected.getAttribute('data-index'));
+    const feedback = document.getElementById('feedback-area');
+    
+    if(index === currentQuestion.correct){
+        selected.classList.add('correct-answer');
+        currentUser.score++;
+        feedback.className = "p-4 rounded-2xl mt-2 correct";
+        feedback.innerHTML = `<h4 class="font-bold text-lg mb-1">✅ Correct!</h4><p>${currentQuestion.explanation}</p>`;
+    } else {
+        selected.classList.add('incorrect-answer');
+        const correctButton = document.querySelector(`.option-button[data-index="${currentQuestion.correct}"]`);
+        correctButton.classList.add('correct-answer');
+        feedback.className = "p-4 rounded-2xl mt-2 incorrect";
+        feedback.innerHTML = `<h4 class="font-bold text-lg mb-1">❌ Incorrect. The correct answer is: ${correctButton.innerText.substring(0, 15)}...</h4><p>${currentQuestion.explanation}</p>`;
+    }
+    
+    document.getElementById('current-score').innerText = currentUser.score;
+    document.getElementById('submit-button').style.display = 'none';
+    document.getElementById('next-button').style.display = 'inline-block';
+    feedback.style.display = 'block';
+}
+
+function showModelAnswer() {
+    const feedback = document.getElementById('feedback-area');
+    feedback.style.display = 'block';
+    feedback.className = "p-4 rounded-2xl mt-2 saq-model";
+    
+    const model = currentQuestion.modelAnswer;
+    
+    feedback.innerHTML = `
+        <h4 class="text-xl font-bold mb-3 text-blue-900 border-b pb-2">Model SAQ Response (Self-Grade):</h4>
+        <div class="space-y-4">
+            <div class="p-3 bg-blue-100 rounded-lg"><strong class="text-indigo-800">(A) Silver:</strong> ${model.A}</div>
+            <div class="p-3 bg-blue-100 rounded-lg"><strong class="text-indigo-800">(B) Cash Crops:</strong> ${model.B}</div>
+            <div class="p-3 bg-blue-100 rounded-lg"><strong class="text-indigo-800">(C) Demographic Change:</strong> ${model.C}</div>
+        </div>
+        <button onclick="loadNewQuestion()" class="mt-5 px-6 py-2 bg-green-700 hover:bg-green-800 text-white font-bold rounded-2xl shadow-md transition">Next Question</button>
+    `;
+}
+
+function resetApp(fullReset = false){
+    if (fullReset) {
+        currentUser.score = 0;
+        document.getElementById('current-score').innerText = 0;
+    }
+    loadNewQuestion();
+}
+
+// Initial app load
+renderFlashcards();
+loadNewQuestion();
+</script>
+</body>
+</html>
